@@ -22,6 +22,21 @@ def home():
     return render_template("index.html")
 
 init_db()
+from flask import request, jsonify
+from database import get_db
+
+@app.route("/search")
+def search_student():
+    name = request.args.get("name", "")
+
+    with get_db() as con:
+        students = con.execute(
+            "SELECT id, name, email, department "
+            "FROM students WHERE name LIKE ?",
+            ("%" + name + "%",)
+        ).fetchall()
+
+    return jsonify([dict(student) for student in students])
 
 if __name__ == "__main__":
     app.run(debug=True)
